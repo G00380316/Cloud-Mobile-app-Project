@@ -44,12 +44,56 @@ const HomeScreen = ({ navigation, route }) => {
   );
 };
 
-const SignUp = ({ route }) => {
+const SignUp = ({ navigation, route }) => {
 
+  const [name, onChangeName] = useState('');
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
+  const [message, setMessage] = useState('');
+
+
+  const handleRegister = async () => {
+
+    const url = 'http://localhost:4000/auth/register';
+    const payload = {
+      name,
+      email,
+      password,
+    };
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (response.status === 201) {
+        setMessage('User registered successfully');
+        console.log(data);
+      } else {
+        throw new Error(data.error || 'Error registering user');
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage(error.message || 'Failed to register');
+    }
+  };
 
   return <View>
+
+    <Separator />
+
+
+    <Text style={styles.text}>name</Text>
+    <TextInput
+      style={styles.input}
+      onChangeText={onChangeName}
+      value={name}
+    />
 
     <Separator />
 
@@ -67,15 +111,17 @@ const SignUp = ({ route }) => {
       style={styles.input}
       onChangeText={onChangePassword}
       value={password}
+      secureTextEntry
     />
 
     <Separator />
 
+
     <Button
       title="Sign Up"
-    // onPress={() =>
-    // //sign up
-    // }
+      onPress={() =>
+        handleRegister()
+      }
     />
 
 
@@ -87,10 +133,37 @@ const SignUp = ({ route }) => {
   </View>;
 };
 
-const SignIn = ({ route }) => {
+const SignIn = ({ navigation, route }) => {
 
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
+
+  const loginUser = async (email, password) => {
+    try {
+      const response = await fetch('http://localhost:4000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      const json = await response.json();
+
+      if (response.status === 200) {
+        console.log('Login successful', json);
+        // Save the token, navigate or perform other actions
+      } else {
+        Alert.alert("Login Failed", json.error);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      Alert.alert("Network Error", "Unable to connect to the server");
+    }
+  };
 
   return <View>
 
@@ -116,9 +189,9 @@ const SignIn = ({ route }) => {
 
     <Button
       title="Sign in"
-    // onPress={() =>
-    // //sign in
-    // }
+      onPress={() =>
+        loginUser(email, password)
+      }
     />
     <Separator />
 
