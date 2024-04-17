@@ -50,13 +50,8 @@ const SignUp = ({ navigation, route }) => {
   const handleRegister = async () => {
 
     const url = 'http://localhost:4000/auth/register';
-    const payload = {
-      name,
-      email,
-      password,
-    };
 
-    console.log(payload)
+    // console.log(payload)
 
     try {
       const response = await fetch(url, {
@@ -64,7 +59,7 @@ const SignUp = ({ navigation, route }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(name, email, password),
       });
 
       const data = await response.json();
@@ -254,7 +249,7 @@ const APIScreen = ({ navigation }) => {
   const callAPI = async () => {
     try {
       const res = await fetch(
-        `https://famous-quotes4.p.rapidapi.com/random?category=all&count=2`,
+        `http://famous-quotes4.p.rapidapi.com/random?category=all&count=2`,
         {
           method: 'GET',
           headers: {
@@ -295,7 +290,7 @@ const APIScreen = ({ navigation }) => {
   );
 };
 
-const AskAI = () => {
+const AskAI = ({navigation, token}) => {
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState(null);
 
@@ -309,7 +304,7 @@ const AskAI = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer yourTokenHere',  //  authentication token here
+          'Authorization': token,  //  authentication token here
         },
         body: JSON.stringify({ question: prompt }),
       });
