@@ -25,24 +25,15 @@ const HomeScreen = ({ navigation, route }) => {
         />
         <Separator />
         <Button
-          title="Go to API Screen 2"
-          onPress={() => navigation.navigate('API2')} // Navigate to the API Screen
+          title="Go and talk to our AI"
+          onPress={() => navigation.navigate('AskAI')} // Navigate to the API Screen
         />
+        <Separator />
         <Button
           title="Log Out"
           onPress={() => navigation.navigate('LogOut')} // Navigate to the API Screen
         />
       </View>
-      {/* {quote && (
-        <>
-          <Separator />
-          <View style={styles.container}>
-
-            <Text style={styles.text}>{JSON.stringify(quote.quote.text, null, 2)}</Text>
-            <Text style={[styles.text, styles.author]}>- {JSON.stringify(quote.quote.author, null, 2)}</Text>
-          </View>
-        </>
-      )} */}
     </SafeAreaView>
 
   );
@@ -202,7 +193,6 @@ const SignIn = ({ navigation, route }) => {
     />
     <Separator />
 
-    <Separator />
     <Button
       title="Go to Home Screen"
       onPress={() => navigation.navigate('Home')} // Navigate to the API Screen
@@ -305,6 +295,61 @@ const APIScreen = ({ navigation }) => {
   );
 };
 
+const AskAI = () => {
+  const [prompt, setPrompt] = useState('');
+  const [response, setResponse] = useState(null);
+
+  const handleSubmit = async () => {
+    if (!prompt.trim()) {
+      Alert.alert("Input Required", "Please enter a prompt to continue.");
+      return;
+    }
+    try {
+      const response = await fetch('http://localhost:4000/ai/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer yourTokenHere',  //  authentication token here
+        },
+        body: JSON.stringify({ question: prompt }),
+      });
+
+      const jsonResponse = await response.json();
+      if (response.status === 201) {
+        setResponse(jsonResponse.response.message.content);
+      } else {
+        throw new Error(jsonResponse.error || 'Failed to fetch response');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <TextInput
+        style={styles.input}
+        placeholder="Enter your prompt"
+        value={prompt}
+        onChangeText={setPrompt}
+        multiline
+      />
+      <Button
+        title="Submit Prompt"
+        onPress={handleSubmit}
+        color="#1a73e8"
+      />
+      {response && (
+        <Text style={styles.response}>
+          {response}
+        </Text>
+      )}
+    </View>
+  );
+};
+
+
 export default function App() {
   return (
     <NavigationContainer>
@@ -313,7 +358,7 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="LogOut" component={LogOut} />
-        <Stack.Screen name="API2" component={APIScreen2} />
+        <Stack.Screen name="AskAI" component={AskAI} />
       </Stack.Navigator>
     </NavigationContainer>
   );
