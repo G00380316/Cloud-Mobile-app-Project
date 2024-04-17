@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, Button, View, StyleSheet, SafeAreaView, TextInput } from 'react-native';
+import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, ScrollView } from 'react-native';
 const Stack = createNativeStackNavigator();
 const Separator = () => <View style={styles.separator} />;
 
@@ -61,6 +61,8 @@ const SignUp = ({ navigation, route }) => {
       password,
     };
 
+    console.log(payload)
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -83,54 +85,53 @@ const SignUp = ({ navigation, route }) => {
     }
   };
 
-  return <View>
-
-    <Separator />
-
-
-    <Text style={styles.text}>name</Text>
+  return <View style={styles.container}>
+    <Text style={styles.text}>Name:</Text>
     <TextInput
       style={styles.input}
       onChangeText={onChangeName}
       value={name}
+      placeholder="Enter your name"
     />
 
-    <Separator />
+    <View style={styles.separator} />
 
-    <Text style={styles.text}>email</Text>
+    <Text style={styles.text}>Email:</Text>
     <TextInput
       style={styles.input}
       onChangeText={onChangeEmail}
       value={email}
+      keyboardType="email-address"
+      placeholder="Enter your email"
     />
 
     <Separator />
 
-    <Text style={styles.text}>password</Text>
+    <Text style={styles.text}>Password:</Text>
     <TextInput
       style={styles.input}
       onChangeText={onChangePassword}
       value={password}
       secureTextEntry
+      placeholder="Enter your password"
     />
 
     <Separator />
-
 
     <Button
       title="Sign Up"
-      onPress={() =>
-        handleRegister()
-      }
+      onPress={handleRegister}
+      color="#1a73e8" // A blue color for the button
     />
-
 
     <Separator />
+
     <Button
       title="Go to Home Screen"
-      onPress={() => navigation.navigate('Home')} // Navigate to the API Screen
+      onPress={() => navigation.navigate('Home')}
+      color="#6a1b9a" // A purple color for this button
     />
-  </View>;
+  </View>
 };
 
 const SignIn = ({ navigation, route }) => {
@@ -165,33 +166,35 @@ const SignIn = ({ navigation, route }) => {
     }
   };
 
-  return <View>
+  return <View style={styles.container}>
 
-    <Separator />
-
-    <Text style={styles.text}>email</Text>
+    <Text style={styles.text}>Email:</Text>
     <TextInput
       style={styles.input}
       onChangeText={onChangeEmail}
       value={email}
+      keyboardType="email-address"
+      placeholder="Enter your email"
     />
 
     <Separator />
 
-    <Text style={styles.text}>password</Text>
+    <Text style={styles.text}>Password:</Text>
     <TextInput
       style={styles.input}
       onChangeText={onChangePassword}
       value={password}
+      secureTextEntry
+      placeholder="Enter your password"
     />
 
     <Separator />
-
     <Button
       title="Sign in"
       onPress={() =>
         loginUser(email, password)
       }
+      color="#1a73e8" // A blue color for the button
     />
     <Separator />
 
@@ -199,6 +202,7 @@ const SignIn = ({ navigation, route }) => {
     <Button
       title="Go to Home Screen"
       onPress={() => navigation.navigate('Home')} // Navigate to the API Screen
+      color="#6a1b9a" // A purple color for this button
     />
   </View>;
 };
@@ -311,7 +315,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   separator: {
-    marginVertical: 8,
+    marginVertical: 12,
     borderBottomColor: '#737373',
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
@@ -327,25 +331,23 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
   },
   container: {
-    padding: 10,
+    flex: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#fff', // Use a light background
+  },
+  input: {
+    height: 50,
+    borderColor: '#ccc',
     borderWidth: 1,
-    borderColor: 'gray',
-    backgroundColor: 'lightgray',
-    borderRadius: 8,
-    margin: 10,
+    marginBottom: 20,
+    paddingHorizontal: 10,
+    borderRadius: 5, // Rounded corners for inputs
   },
   text: {
     fontSize: 16,
-    marginBottom: 5,
-  },
-  author: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
+    color: '#333', // Darker text for better readability
+    marginBottom: 10,
+    fontWeight: 'bold', // Make the labels bold
   },
 });
