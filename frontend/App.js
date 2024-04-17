@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, ScrollView } from 'react-native';
+import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert } from 'react-native';
 const Stack = createNativeStackNavigator();
 const Separator = () => <View style={styles.separator} />;
 
@@ -27,6 +27,10 @@ const HomeScreen = ({ navigation, route }) => {
         <Button
           title="Go to API Screen 2"
           onPress={() => navigation.navigate('API2')} // Navigate to the API Screen
+        />
+        <Button
+          title="Log Out"
+          onPress={() => navigation.navigate('LogOut')} // Navigate to the API Screen
         />
       </View>
       {/* {quote && (
@@ -207,6 +211,53 @@ const SignIn = ({ navigation, route }) => {
   </View>;
 };
 
+const LogOut = ({ navigation, route, token }) => {
+
+  const [email, onChangeEmail] = useState('');
+  const [password, onChangePassword] = useState('');
+
+  const logoutUser = async (token) => {
+    try {
+        const response = await fetch('http://localhost:4000/auth/logout', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        const json = await response.json();
+
+        if (response.status === 200) {
+            Alert.alert("Logout Successful", json.message);
+            // Handle additional cleanup if necessary, e.g., navigating to login screen or clearing local state/storage
+        } else {
+            throw new Error(json.error || 'Failed to logout');
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+        Alert.alert("Logout Failed", error.message || "Internal Server Error");
+    }
+};
+
+
+  return <View style={styles.container}>
+    <Button
+      title="Log Out"
+      onPress={() =>
+        logoutUser(token)
+      }
+      color="#1a73e8" // A blue color for the button
+    />
+    <Separator />
+
+    <Button
+      title="Go to Home Screen"
+      onPress={() => navigation.navigate('Home')} // Navigate to the API Screen
+      color="#6a1b9a" // A purple color for this button
+    />
+  </View>;
+};
+
 const APIScreen = ({ navigation }) => {
   const [apiData, setApiData] = useState(null);
 
@@ -261,6 +312,7 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="SignIn" component={SignIn} />
+        <Stack.Screen name="LogOut" component={LogOut} />
         <Stack.Screen name="API2" component={APIScreen2} />
       </Stack.Navigator>
     </NavigationContainer>
