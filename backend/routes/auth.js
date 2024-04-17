@@ -9,7 +9,7 @@ const router = express.Router();
 
 export let tokenBlacklist = [];
 
-router.post("/logout", authenticateToken, async (req, res) => {
+router.post("/logout", authenticateToken, async (req, res) => { // http://localhost:4000/auth/logout
     try {
         const token = req.headers.authorization.split(" ")[1];
 
@@ -22,7 +22,7 @@ router.post("/logout", authenticateToken, async (req, res) => {
     }
 });
 
-router.post("/register", async (req, res) => {
+router.post("/register", async (req, res) => { // http://localhost:4000/auth/register
     try {
         const { name, email, password } = await req.body;
 
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
     }
 });
 
-router.post("/userCheck", async (req, res) => {
+router.post("/userCheck", async (req, res) => { // http://localhost:4000/auth/userCheck
     try {
         await connectMongoDB();
         const { email } = req.body;
@@ -59,7 +59,7 @@ router.post("/userCheck", async (req, res) => {
     }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res) => { // http://localhost:4000/auth/login
     try {
         await connectMongoDB();
         const { email, password } = req.body;

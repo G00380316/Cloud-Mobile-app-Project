@@ -16,7 +16,7 @@ import Response from '../models/response.js';
         res.send(`Hello, this is the Ai Route make sure your key is in the .env`);
     })
 
-    router.post('/create', async (req, res) => {
+    router.post('/create', async (req, res) => { // http://localhost:4000/ai/create
         
         const { question } = req.body;
             
@@ -45,7 +45,7 @@ import Response from '../models/response.js';
         }
     })
 
-    router.post("/create/protected", authenticateToken ,async (req, res) => {
+    router.post("/create/protected", authenticateToken ,async (req, res) => { // http://localhost:4000/ai/create/protected
         const { question } = req.body;
 
         const prompt =
@@ -77,7 +77,7 @@ import Response from '../models/response.js';
         }
     });
 
-    router.get('/get/response/byUser',authenticateToken, async (req, res) => {
+    router.get('/get/response/byUser',authenticateToken, async (req, res) => { // http://localhost:4000/ai/get/response/byuser
         const user = req.user.id;
 
         try {

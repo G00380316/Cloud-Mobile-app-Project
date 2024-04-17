@@ -4,7 +4,7 @@ import authenticateToken from '../middleware.js';
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', async (req, res) => { // http://localhost:4000/post
     try {
 
         const posts = await Post.find();
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     }
 });
 
-router.post('/create', authenticateToken , async (req, res) => {
+router.post('/create', authenticateToken , async (req, res) => { // http://localhost:4000/post/create
     const { content, media } = req.body;
     const user = req.user.id;
 
@@ -49,7 +49,7 @@ router.post('/create', authenticateToken , async (req, res) => {
 });
 
 
-router.post('/update/pins', authenticateToken , async (req, res) => {
+router.post('/update/pins', authenticateToken , async (req, res) => { // http://localhost:4000/post/update/pins
 
     const { postId } = req.body;
     const pin = req.user.id;
@@ -83,7 +83,7 @@ router.post('/update/pins', authenticateToken , async (req, res) => {
     }
 });
 
-router.post('/byUserId', async (req, res) => {
+router.post('/byUserId', async (req, res) => { // http://localhost:4000/post/byuserid
 
     const { userId } = req.body;
 
@@ -102,7 +102,7 @@ router.post('/byUserId', async (req, res) => {
     }
 });
 
-router.post('/byId', async (req, res) => {
+router.post('/byId', async (req, res) => { // http://localhost:4000/post/byid
 
     const { postId } = req.body;
 
@@ -121,7 +121,7 @@ router.post('/byId', async (req, res) => {
     }
 });
 
-router.post('/delete', async (req, res) => {
+router.post('/delete', async (req, res) => { // http://localhost:4000/post/delete
 
     const { postId } = req.body;
 

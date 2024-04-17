@@ -16,7 +16,7 @@ router.get("/", (req, res) => {
     res.send(`Hello, this is the Top Destination Route`);
 });
 
-router.post("/webscrape", async (req, res) => {
+router.post("/webscrape", async (req, res) => { // http://localhost:4000/top/webscrape
     try {
         // Fetched the HTML of the page I want to scrape
         const { data } = await axios.get(process.env.SCRAPE_URL);
