@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image } from 'react-native';
+import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 
 const SERVER_URL ="https://e9ac-193-1-57-1.ngrok-free.app"
 
@@ -253,17 +253,19 @@ const LogOut = ({ navigation, route }) => {
   return <View style={styles.container}>
     <Button
       title="Log Out"
-      onPress={() =>
+      onPress={() =>{
         logoutUser(token)
+        navigation.navigate('Home', {token: null})
       }
-      color="#1a73e8" // A blue color for the button
+      }
+      color="#1a73e8" 
     />
     <Separator />
 
     <Button
       title="Go to Home Screen"
-      onPress={() => navigation.navigate('Home')} // Navigate to the API Screen
-      color="#6a1b9a" // A purple color for this button
+      onPress={() => navigation.navigate('Home')} 
+      color="#6a1b9a" 
     />
   </View>;
 };
@@ -324,25 +326,19 @@ const AskAI = ({ navigation, route }) => {
   );
 };
 
-const TopDestinations = ({ navigation, route }) => {
+const TopDestinations = () => {
   const [destinations, setDestinations] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchTopDestinations = async () => {
-    setLoading(true);
+  const fetchDestinations = async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/top/webscrape`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      });
-      const jsonResponse = await response.json();
+      const response = await fetch(`${SERVER_URL}/top/topdes`); 
+      const data = await response.json();
       if (response.ok) {
-        setDestinations(jsonResponse.response);
+        setDestinations(data);
       } else {
-        throw new Error(jsonResponse.message || 'Something went wrong');
+        throw new Error('Failed to fetch destinations');
       }
     } catch (error) {
       setError(error.message);
@@ -352,25 +348,26 @@ const TopDestinations = ({ navigation, route }) => {
   };
 
   useEffect(() => {
-    fetchTopDestinations();
+    fetchDestinations();
   }, []);
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
+  }
+
+  if (error) {
+    return <View style={styles.container}><Text>Error: {error}</Text></View>;
+  }
 
   return (
     <ScrollView style={styles.scrollContainer}>
-      {loading ? (
-        <Text>Loading destinations...</Text>
-      ) : error ? (
-        <Text>Error: {error}</Text>
-      ) : (
-        destinations.map((destination, index) => (
-          <View key={index} style={styles.destination}>
-            <Image source={{ uri: destination.image }} style={styles.image} />
-            <Text style={styles.title}>{destination.title}</Text>
-            <Text>{destination.description}</Text>
-          </View>
-        ))
-      )}
-      <Button title="Reload Destinations" onPress={fetchTopDestinations} />
+      {destinations.map((destination, index) => (
+        <View key={index} style={styles.destination}>
+          <Image src={ destination.image } style={styles.image} />
+          <Text style={styles.title}>{destination.title}</Text>
+          <Text style={styles.description}>{destination.description}</Text>
+        </View>
+      ))}
     </ScrollView>
   );
 };
@@ -440,5 +437,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
+  image:{
+    width: '100%',
+    height: 200,
+    borderRadius: 10,
+  }
 
 });
