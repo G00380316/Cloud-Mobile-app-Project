@@ -82,7 +82,7 @@ router.post("/login", async (req, res) => { // http://localhost:4000/auth/login
 
         console.log("User password has been checked...password: ", passwordMatch);
 
-        const token = jwt.sign({ id: user._id }, "your-secret-key", {
+        const token = jwt.sign({ id: user._id , name: user.name , password: user.email}, "your-secret-key", {
         expiresIn: "1h",
         });
 
