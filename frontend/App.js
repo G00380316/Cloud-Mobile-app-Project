@@ -3,7 +3,11 @@ import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image } from 'react-native';
+
+const SERVER_URL ="https://e9ac-193-1-57-1.ngrok-free.app"
+
 const Stack = createNativeStackNavigator();
+
 const Separator = () => <View style={styles.separator} />;
 
 const HomeScreen = ({ navigation, route }) => {
@@ -32,7 +36,7 @@ const HomeScreen = ({ navigation, route }) => {
             />
             <Separator />
             <Button
-              title="Have a Look at some Top"
+              title="Have a Look at some Top Destinations"
               onPress={() => navigation.navigate('TopDestinations', { token })}
             />
             <Separator />
@@ -58,7 +62,7 @@ const SignUp = ({ navigation, route }) => {
 
   const handleRegister = async () => {
 
-    const url = 'https://e9ac-193-1-57-1.ngrok-free.app/auth/register';
+    const url = `${process.env.SERVER_URL}/auth/register`;
 
     // console.log(payload)
 
@@ -149,7 +153,7 @@ const SignIn = ({ navigation, route }) => {
 
   const loginUser = async (email, password) => {
     try {
-      const response = await fetch(`https://e9ac-193-1-57-1.ngrok-free.app/auth/login`, {
+      const response = await fetch(`${SERVER_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -224,7 +228,7 @@ const LogOut = ({ navigation, route }) => {
 
   const logoutUser = async (token) => {
     try {
-      const response = await fetch('https://e9ac-193-1-57-1.ngrok-free.app/auth/logout', {
+      const response = await fetch(`${SERVER_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -264,52 +268,6 @@ const LogOut = ({ navigation, route }) => {
   </View>;
 };
 
-const APIScreen = ({ navigation }) => {
-  const [apiData, setApiData] = useState(null);
-
-  const callAPI = async () => {
-    try {
-      const res = await fetch(
-        `http://famous-quotes4.p.rapidapi.com/random?category=all&count=2`,
-        {
-          method: 'GET',
-          headers: {
-            'X-RapidAPI-Key': '74cfa29e12msh3bbdf76c356126dp151912jsn1a548502b34c',
-            'X-RapidAPI-Host': 'famous-quotes4.p.rapidapi.com',
-          },
-        }
-      );
-      const data = await res.json();
-      setApiData(data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  return (
-    <SafeAreaView>
-      <View >
-        <Separator />
-
-        <Button title="Make API call" onPress={callAPI} color="#f194ff" />
-        <Separator />
-        {apiData && (
-          <View style={styles.container}>
-            <Text style={styles.text}>{JSON.stringify(apiData[0].text, null, 2)}</Text>
-            <Text style={[styles.text, styles.author]}>- {JSON.stringify(apiData[0].author, null, 2)}</Text>
-          </View>
-        )}
-        <Button
-          title="Send text to home page"
-          onPress={() => navigation.navigate('Home', { quote: apiData[0] })}
-        />
-
-
-      </View>
-    </SafeAreaView>
-
-  );
-};
 
 const AskAI = ({ navigation, route }) => {
   const token = route.params.token;
@@ -322,7 +280,7 @@ const AskAI = ({ navigation, route }) => {
       return;
     }
     try {
-      const response = await fetch(`https://e9ac-193-1-57-1.ngrok-free.app/ai/create/protected`, {
+      const response = await fetch(`${SERVER_URL}/ai/create/protected`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -374,7 +332,7 @@ const TopDestinations = ({ navigation, route }) => {
   const fetchTopDestinations = async () => {
     setLoading(true);
     try {
-      const response = await fetch('https://e9ac-193-1-57-1.ngrok-free.app/top/webscrape', { // Change the IP as needed
+      const response = await fetch(`${SERVER_URL}/top/webscrape`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -432,44 +390,6 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
-const APIScreen2 = () => {
-  const [apiData2, setApiData2] = useState(null);
-
-  const callAPI2 = async () => {
-    try {
-      const res = await fetch(
-        `https://082d-193-1-57-1.ngrok-free.app/getAllProducts`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'ngrok-skip-browser-warning': '69420',
-          },
-        }
-      );
-      const data2 = await res.text();
-      setApiData2(JSON.stringify(data2));
-      console.log(apiData2);
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
-  return (
-    <SafeAreaView>
-      <View >
-        <Separator />
-
-        <Button title="Make API call" onPress={callAPI2} color="#f194ff" />
-
-        <Text style={styles.text}>- {apiData2}</Text>
-
-      </View>
-    </SafeAreaView>
-
-  );
-};
 
 const styles = StyleSheet.create({
   title: {
