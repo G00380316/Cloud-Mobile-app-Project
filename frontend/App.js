@@ -1,41 +1,50 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert } from 'react-native';
+import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image } from 'react-native';
 const Stack = createNativeStackNavigator();
 const Separator = () => <View style={styles.separator} />;
 
 const HomeScreen = ({ navigation, route }) => {
-  const quote = route.params;
+  const token = route?.params.token;
   return (
     <SafeAreaView>
       <View>
-        <Button
-          title="Sign Up"
-          onPress={() =>
-            navigation.navigate('SignUp') // Navigate to sign up
-          }
-        />
-        <Separator />
-
-        <Button
-          title="Sign In"
-          onPress={() => navigation.navigate('SignIn')} // Navigate to sign in
-        />
-        <Separator />
-        <Button
-          title="Go and talk to our AI"
-          onPress={() => navigation.navigate('AskAI')} // Navigate to the API Screen
-        />
-        <Separator />
-        <Button
-          title="Log Out"
-          onPress={() => navigation.navigate('LogOut')} // Navigate to the API Screen
-        />
+        {!token ? (
+          <>
+            <Button
+              title="Sign Up"
+              onPress={() => navigation.navigate('SignUp')}
+            />
+            <Separator />
+            <Button
+              title="Sign In"
+              onPress={() => navigation.navigate('SignIn')}
+            />
+            <Separator />
+          </>
+        ) : (
+          <>
+            <Button
+              title="Go and talk to our AI"
+              onPress={() => navigation.navigate('AskAI', { token })}
+            />
+            <Separator />
+            <Button
+              title="Have a Look at some Top"
+              onPress={() => navigation.navigate('TopDestinations', { token })}
+            />
+            <Separator />
+            <Button
+              title="Log Out"
+              onPress={() => navigation.navigate('LogOut', { token })}
+            />
+            <Separator />
+          </>
+        )}
       </View>
     </SafeAreaView>
-
   );
 };
 
@@ -49,9 +58,15 @@ const SignUp = ({ navigation, route }) => {
 
   const handleRegister = async () => {
 
-    const url = 'http://localhost:4000/auth/register';
+    const url = 'https://e9ac-193-1-57-1.ngrok-free.app/auth/register';
 
     // console.log(payload)
+
+    payload = {
+      name,
+      email,
+      password
+    }
 
     try {
       const response = await fetch(url, {
@@ -59,13 +74,16 @@ const SignUp = ({ navigation, route }) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(name, email, password),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
       if (response.status === 201) {
         setMessage('User registered successfully');
         console.log(data);
+
+        //add notification for sucessful signup
+        navigation.navigate('Home');
       } else {
         throw new Error(data.error || 'Error registering user');
       }
@@ -131,7 +149,7 @@ const SignIn = ({ navigation, route }) => {
 
   const loginUser = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:4000/auth/login', {
+      const response = await fetch(`https://e9ac-193-1-57-1.ngrok-free.app/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,6 +165,8 @@ const SignIn = ({ navigation, route }) => {
       if (response.status === 200) {
         console.log('Login successful', json);
         // Save the token, navigate or perform other actions
+        console.log(json)
+        navigation.navigate('Home', { token: json.token });
       } else {
         Alert.alert("Login Failed", json.error);
       }
@@ -196,33 +216,34 @@ const SignIn = ({ navigation, route }) => {
   </View>;
 };
 
-const LogOut = ({ navigation, route, token }) => {
+const LogOut = ({ navigation, route }) => {
+  const token = route.params.token;
 
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
 
   const logoutUser = async (token) => {
     try {
-        const response = await fetch('http://localhost:4000/auth/logout', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
-        });
+      const response = await fetch('https://e9ac-193-1-57-1.ngrok-free.app/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
 
-        const json = await response.json();
+      const json = await response.json();
 
-        if (response.status === 200) {
-            Alert.alert("Logout Successful", json.message);
-            // Handle additional cleanup if necessary, e.g., navigating to login screen or clearing local state/storage
-        } else {
-            throw new Error(json.error || 'Failed to logout');
-        }
+      if (response.status === 200) {
+        Alert.alert("Logout Successful", json.message);
+        // Handle additional cleanup if necessary, e.g., navigating to login screen or clearing local state/storage
+      } else {
+        throw new Error(json.error || 'Failed to logout');
+      }
     } catch (error) {
-        console.error('Logout error:', error);
-        Alert.alert("Logout Failed", error.message || "Internal Server Error");
+      console.error('Logout error:', error);
+      Alert.alert("Logout Failed", error.message || "Internal Server Error");
     }
-};
+  };
 
 
   return <View style={styles.container}>
@@ -290,7 +311,8 @@ const APIScreen = ({ navigation }) => {
   );
 };
 
-const AskAI = ({navigation, token}) => {
+const AskAI = ({ navigation, route }) => {
+  const token = route.params.token;
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState(null);
 
@@ -300,11 +322,11 @@ const AskAI = ({navigation, token}) => {
       return;
     }
     try {
-      const response = await fetch('http://localhost:4000/ai/create', {
+      const response = await fetch(`https://e9ac-193-1-57-1.ngrok-free.app/ai/create/protected`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token,  //  authentication token here
+          'Authorization': `Bearer ${token}`,  //  authentication token here
         },
         body: JSON.stringify({ question: prompt }),
       });
@@ -344,15 +366,67 @@ const AskAI = ({navigation, token}) => {
   );
 };
 
+const TopDestinations = ({ navigation, route }) => {
+  const [destinations, setDestinations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const fetchTopDestinations = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('https://e9ac-193-1-57-1.ngrok-free.app/top/webscrape', { // Change the IP as needed
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      });
+      const jsonResponse = await response.json();
+      if (response.ok) {
+        setDestinations(jsonResponse.response);
+      } else {
+        throw new Error(jsonResponse.message || 'Something went wrong');
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTopDestinations();
+  }, []);
+
+  return (
+    <ScrollView style={styles.scrollContainer}>
+      {loading ? (
+        <Text>Loading destinations...</Text>
+      ) : error ? (
+        <Text>Error: {error}</Text>
+      ) : (
+        destinations.map((destination, index) => (
+          <View key={index} style={styles.destination}>
+            <Image source={{ uri: destination.image }} style={styles.image} />
+            <Text style={styles.title}>{destination.title}</Text>
+            <Text>{destination.description}</Text>
+          </View>
+        ))
+      )}
+      <Button title="Reload Destinations" onPress={fetchTopDestinations} />
+    </ScrollView>
+  );
+};
+
 
 export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} initialParams={{ token: null }} />
         <Stack.Screen name="SignUp" component={SignUp} />
         <Stack.Screen name="SignIn" component={SignIn} />
         <Stack.Screen name="LogOut" component={LogOut} />
+        <Stack.Screen name="TopDestinations" component={TopDestinations} />
         <Stack.Screen name="AskAI" component={AskAI} />
       </Stack.Navigator>
     </NavigationContainer>
@@ -442,4 +516,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontWeight: 'bold', // Make the labels bold
   },
+  scrollContainer: {
+    flex: 1,
+    padding: 10,
+  },
+
 });
