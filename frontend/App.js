@@ -4,7 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 
-const SERVER_URL ="https://e9ac-193-1-57-1.ngrok-free.app"
+const SERVER_URL = "https://e9ac-193-1-57-1.ngrok-free.app"
 
 const Stack = createNativeStackNavigator();
 
@@ -253,19 +253,19 @@ const LogOut = ({ navigation, route }) => {
   return <View style={styles.container}>
     <Button
       title="Log Out"
-      onPress={() =>{
+      onPress={() => {
         logoutUser(token)
-        navigation.navigate('Home', {token: null})
+        navigation.navigate('Home', { token: null })
       }
       }
-      color="#1a73e8" 
+      color="#1a73e8"
     />
     <Separator />
 
     <Button
       title="Go to Home Screen"
-      onPress={() => navigation.navigate('Home')} 
-      color="#6a1b9a" 
+      onPress={() => navigation.navigate('Home')}
+      color="#6a1b9a"
     />
   </View>;
 };
@@ -275,8 +275,10 @@ const AskAI = ({ navigation, route }) => {
   const token = route.params.token;
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    setLoading(true);
     if (!prompt.trim()) {
       Alert.alert("Input Required", "Please enter a prompt to continue.");
       return;
@@ -294,6 +296,7 @@ const AskAI = ({ navigation, route }) => {
       const jsonResponse = await response.json();
       if (response.status === 201) {
         setResponse(jsonResponse.response.message.content);
+        setLoading(false);
       } else {
         throw new Error(jsonResponse.error || 'Failed to fetch response');
       }
@@ -303,26 +306,37 @@ const AskAI = ({ navigation, route }) => {
     }
   };
 
+  const askAgain = async () => {
+    setResponse("");
+    setPrompt("");
+
+  }
+
+  if (loading) {
+    return <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />;
+  }
+
   return (
-    <View style={styles.container}>
-      <TextInput
+    <ScrollView style={styles.scrollContainer}>
+      {!response && <><TextInput
         style={styles.input}
         placeholder="Enter your prompt"
         value={prompt}
         onChangeText={setPrompt}
-        multiline
-      />
-      <Button
-        title="Submit Prompt"
-        onPress={handleSubmit}
-        color="#1a73e8"
-      />
+        multiline />
+        <Button
+          title="Submit Prompt"
+          onPress={handleSubmit}
+          color="#1a73e8" /></>}
       {response && (
-        <Text style={styles.response}>
+        <><Text style={styles.response}>
           {response}
-        </Text>
+        </Text><Button
+            title="Ask again?"
+            onPress={askAgain}
+            color="#1a73e8" /></>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -333,7 +347,7 @@ const TopDestinations = () => {
 
   const fetchDestinations = async () => {
     try {
-      const response = await fetch(`${SERVER_URL}/top/topdes`); 
+      const response = await fetch(`${SERVER_URL}/top/topdes`);
       const data = await response.json();
       if (response.ok) {
         setDestinations(data);
@@ -363,7 +377,7 @@ const TopDestinations = () => {
     <ScrollView style={styles.scrollContainer}>
       {destinations.map((destination, index) => (
         <View key={index} style={styles.destination}>
-          <Image src={ destination.image } style={styles.image} />
+          <Image src={destination.image} style={styles.image} />
           <Text style={styles.title}>{destination.title}</Text>
           <Text style={styles.description}>{destination.description}</Text>
         </View>
@@ -437,7 +451,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
   },
-  image:{
+  image: {
     width: '100%',
     height: 200,
     borderRadius: 10,
