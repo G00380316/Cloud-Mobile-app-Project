@@ -2,9 +2,11 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image, ActivityIndicator, FlatList } from 'react-native';
+import axios from 'axios';
+import ImgPicker from './ImagePicker';
 
-const SERVER_URL = "https://e9ac-193-1-57-1.ngrok-free.app"
+const SERVER_URL = "https://42a8-193-1-57-1.ngrok-free.app"
 
 const Stack = createNativeStackNavigator();
 
@@ -38,6 +40,16 @@ const HomeScreen = ({ navigation, route }) => {
             <Button
               title="Have a Look at some Top Destinations"
               onPress={() => navigation.navigate('TopDestinations', { token })}
+            />
+            <Separator />
+            <Button
+              title="ViewPosts"
+              onPress={() => navigation.navigate('ViewPosts', { token })}
+            />
+            <Separator />
+            <Button
+              title="CreatePost"
+              onPress={() => navigation.navigate('CreatePost', { token })}
             />
             <Separator />
             <Button
@@ -386,6 +398,98 @@ const TopDestinations = () => {
   );
 };
 
+const CreatePostScreen = ({navigation, route}) => {
+  const authToken = route.params.token;
+
+  const createPost = async (media) => {
+    const url =   `${SERVER_URL}/post/create`;
+    const formData = new FormData();
+    formData.append('media', { uri: media, type: 'image/jpeg', name: 'upload.jpg' });
+    formData.append('content', 'New Post with Image'); // Adjust as per your data requirements
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`, // Ensure your server expects a Bearer token
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        Alert.alert('Error', responseData.message || 'Failed to create post');
+        return;
+      }
+
+      Alert.alert('Success', 'Post created successfully!');
+      navigation.goBack(); // Go back to the previous screen or to the home screen as needed
+    } catch (error) {
+      console.error('Error creating post:', error);
+      Alert.alert('Error', 'Failed to create post');
+    }
+  };
+
+  return (
+    <View>
+      <ImgPicker onImageTaken={createPost} />
+    </View>
+  );
+};
+
+const ViewPosts = ({navigation, route }) => {
+
+  const authToken = route.params.token;
+  const [post, setPost] = useState(null);
+  const { postId } = route.params;  // Get the postId passed via navigation
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`${SERVER_URL}/post/byId`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`  // Replace with your method of retrieving the auth token
+          },
+          body: JSON.stringify({ postId })
+        });
+        const responseData = await response.json();
+        if (!response.ok) {
+          Alert.alert('Error', 'Failed to fetch post details');
+          return;
+        }
+        setPost(responseData);
+      } catch (error) {
+        console.error('Error fetching post:', error);
+        Alert.alert('Error', 'Failed to load post details');
+      }
+    };
+
+    fetchPost();
+  }, [postId]);
+
+  if (!post) {
+    return (
+      <View style={styles.centered}>
+       <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>{post.title}</Text>  // Assuming your post object has a title
+      <Image source={{ uri: post.imageUrl }} style={styles.image} />  // Assuming your post has an imageUrl
+      <Text style={styles.content}>{post.content}</Text>  // Assuming your post has content
+    </ScrollView>
+  );
+};
+
+
+
 
 export default function App() {
   return (
@@ -397,6 +501,8 @@ export default function App() {
         <Stack.Screen name="LogOut" component={LogOut} />
         <Stack.Screen name="TopDestinations" component={TopDestinations} />
         <Stack.Screen name="AskAI" component={AskAI} />
+        <Stack.Screen name="CreatePost" component={CreatePostScreen} />
+        <Stack.Screen name="ViewPosts" component={ViewPosts} />
       </Stack.Navigator>
     </NavigationContainer>
   );
