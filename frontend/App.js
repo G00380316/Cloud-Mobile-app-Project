@@ -5,7 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Text, Button, View, StyleSheet, SafeAreaView, TextInput, Alert, ScrollView, Image, ActivityIndicator } from 'react-native';
 import ImgPicker from './ImagePicker';
 
-const SERVER_URL ="https://4e4e-2a01-b340-65-63d-1db1-e8a6-d3d-3c72.ngrok-free.app";
+const SERVER_URL ="https://ef08-193-1-57-1.ngrok-free.app";
 const unsignedUploadPreset = "vb2k8vdb";
 
 const Stack = createNativeStackNavigator();
@@ -45,11 +45,6 @@ const HomeScreen = ({ navigation, route }) => {
             <Button
               title="ViewPosts"
               onPress={() => navigation.navigate('ViewPosts', { token })}
-            />
-            <Separator />
-            <Button
-              title="CreatePost"
-              onPress={() => navigation.navigate('CreatePost', { token })}
             />
             <Separator />
             <Button
@@ -469,7 +464,7 @@ const CreatePostScreen = ({ navigation, route }) => {
       }
 
       Alert.alert("Success", "Post created successfully!");
-      navigation.goBack();
+      navigation.navigate('ViewPosts', { token })
     } catch (error) {
 
       console.error("Error creating post:", error);
@@ -507,6 +502,7 @@ const CreatePostScreen = ({ navigation, route }) => {
 };
 
 const ViewPosts = ({ navigation, route }) => {
+  const token = route?.params.token;
   const [posts, setPosts] = useState([]);
 
   useEffect(() => {
@@ -545,21 +541,23 @@ const ViewPosts = ({ navigation, route }) => {
   }
 
   return (
-    <ScrollView style={styles.scrollView}>
-      {posts.map((post) => (
-        <View key={post._id} style={styles.postContainer}>
-          {post.media && (
-            <Image
-              source={{ uri: post.media }}
-              style={styles.postImage}
-              resizeMode="contain"
-            />
-          )}
-          <Text style={styles.postAuth}>{post.authname}</Text>
-          <Text style={styles.postText}>{post.content}</Text>
-        </View>
-      ))}
-    </ScrollView>
+    <><Button
+      title="CreatePost"
+      onPress={() => navigation.navigate('CreatePost', { token })}
+      style={styles.stickyButton} /><ScrollView style={styles.scrollView}>
+        {posts.map((post) => (
+          <View key={post._id} style={styles.postContainer}>
+            {post.media && (
+              <Image
+                source={{ uri: post.media }}
+                style={styles.postImage}
+                resizeMode="contain" />
+            )}
+            <Text style={styles.postAuth}>{post.authname}</Text>
+            <Text style={styles.postText}>{post.content}</Text>
+          </View>
+        ))}
+      </ScrollView></>
   );
 };
 
@@ -665,5 +663,39 @@ const styles = StyleSheet.create({
   },
   description: {
     marginBottom: 20,
+  },
+  postContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    marginVertical: 8,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+    elevation: 3,
+    marginTop: 50,
+  },
+  postImage: {
+    width: '100%',
+    height: 200,
+    marginBottom: 10,
+  },
+  postAuth: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 5,
+  },
+  postText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+  },
+  stickyButton: {
+    position: 'absolute',
+    top: 0, 
+    width: '100%',
+    zIndex: 1, 
   },
 });
