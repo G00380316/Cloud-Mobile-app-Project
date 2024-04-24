@@ -59,6 +59,23 @@ router.post("/userCheck", async (req, res) => { // http://localhost:4000/auth/us
     }
 });
 
+
+router.post("/finduser", async (req, res) => { // http://localhost:4000/auth/finduser
+    try {
+        await connectMongoDB();
+        const { _id } = req.body;
+
+        const user = await User.findOne({ _id });
+
+        console.log("User has been found...user: ", user);
+
+        res.status(201).json({ user });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.post("/login", async (req, res) => { // http://localhost:4000/auth/login
     try {
         await connectMongoDB();
@@ -82,7 +99,7 @@ router.post("/login", async (req, res) => { // http://localhost:4000/auth/login
 
         console.log("User password has been checked...password: ", passwordMatch);
 
-        const token = jwt.sign({ id: user._id }, "your-secret-key", {
+        const token = jwt.sign({ id: user._id , name: user.name , password: user.email}, "your-secret-key", {
         expiresIn: "1h",
         });
 

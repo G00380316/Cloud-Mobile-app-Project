@@ -66,6 +66,24 @@ router.post("/webscrape", async (req, res) => { // http://localhost:4000/top/web
     }
 });
 
+router.get("/topdes", async (req, res) => {
+    try {
+
+        connectMongoDB();
+
+        const destinations = await Destination.find().sort({sortOrder: 1});;
+
+        res.status(200).json(destinations);
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({ error: 'Internal Server Error' });
+
+    }
+})
+
 //  destination.description = $(el).find("p").text().trim();
 //destination.description = $(el).children("p").text();
 

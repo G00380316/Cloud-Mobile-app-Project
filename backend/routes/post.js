@@ -23,56 +23,22 @@ router.get('/', async (req, res) => { // http://localhost:4000/post
 router.post('/create', authenticateToken , async (req, res) => { // http://localhost:4000/post/create
     const { content, media } = req.body;
     const user = req.user.id;
+    const name = req.user.name;
 
     try {
         var newPost;
 
         if (!media) {
-            newPost = await Post.create({ user, content });
+            newPost = await Post.create({ user, content, authname: name });
         }
         else if (!content) {
-            newPost = await Post.create({ user, media });
+            newPost = await Post.create({ user, media, authname: name });
         }
         else if (media){
-            newPost = await Post.create({ user, content, media });
+            newPost = await Post.create({ user, content, media, authname: name });
         }
 
         res.status(201).json(newPost);
-
-    } catch (error) {
-
-        console.error(error);
-
-        res.status(500).json({ error: 'Internal Server Error' });
-
-    }
-});
-
-
-router.post('/update/pins', authenticateToken , async (req, res) => { // http://localhost:4000/post/update/pins
-
-    const { postId } = req.body;
-    const pin = req.user.id;
-
-    try {
-
-        let newPins = [];
-
-        newPins.push(pin);
-
-        const post = await Post.findOne({ _id: postId });
-
-        if (!post?.pins.includes(pin)) {
-            newPins.concat(post?.pins);
-        } else {
-            newPins = newPins.filter((p) => p !== pin);
-        }
-
-        console.log(newPins);
-
-        const updatedPost = await Post.findByIdAndUpdate(postId, { pins: newPins }, { new: true });
-
-        res.status(200).json(updatedPost);
 
     } catch (error) {
 
