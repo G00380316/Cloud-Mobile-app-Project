@@ -3,7 +3,6 @@ import express from 'express';
 import OpenAI from "openai";
 import { connectMongoDB } from '../lib/mongo.js';
 import authenticateToken from "../middleware.js";
-import Prompt from '../models/prompt.js';
 import Response from '../models/response.js';
 
     dotenv.config();
@@ -54,14 +53,12 @@ import Response from '../models/response.js';
                             metrics that would be beneficial for a tourist and someone
                             in search of an holiday destination:
                             ` + question;
-        
-        await Prompt.create({ user:  req.user.id ,  prompt });
 
         try {
             const response = await openai.chat.completions.create({
             model: "gpt-3.5-turbo",
             messages: [{ role: "user", content: prompt }],
-            max_tokens: 100,
+            max_tokens: 500,
             });
 
             await connectMongoDB();

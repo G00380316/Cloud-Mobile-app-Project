@@ -71,7 +71,7 @@ router.get("/topdes", async (req, res) => {
 
         connectMongoDB();
 
-        const destinations = await Destination.find().sort({ order: 1 });;
+        const destinations = await Destination.find().sort({sortOrder: 1});;
 
         res.status(200).json(destinations);
 

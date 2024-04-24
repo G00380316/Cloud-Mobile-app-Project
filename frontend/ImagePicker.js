@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
-import { View, Button, Image, Text, StyleSheet, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+import React, { useState } from "react";
+import { View, Button, Image, Text, StyleSheet, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
-export const ImgPicker = (props) => {
+const ImgPicker = (props) => {
   const [pickedImage, setPickedImage] = useState();
 
-  const verifyPermissions = async () => {
+  const verifyCameraPermissions = async () => {
     const result = await ImagePicker.requestCameraPermissionsAsync();
-    if (result.granted !== true) {
+    if (!result.granted) {
       Alert.alert(
-        'Insufficient permissions!',
-        'You need to grant camera permissions to use this app.',
-        [{ text: 'OK' }]
+        "Insufficient permissions!",
+        "You need to grant camera permissions to use this app.",
+        [{ text: "OK" }]
+      );
+      return false;
+    }
+    return true;
+  };
+
+  const verifyGalleryPermissions = async () => {
+    const result = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!result.granted) {
+      Alert.alert(
+        "Insufficient permissions!",
+        "You need to grant media library permissions to use this app.",
+        [{ text: "OK" }]
       );
       return false;
     }
@@ -19,24 +32,43 @@ export const ImgPicker = (props) => {
   };
 
   const takeImageHandler = async () => {
-    const hasPermission = await verifyPermissions();
+    const hasPermission = await verifyCameraPermissions();
     if (!hasPermission) {
       return;
     }
+
     const image = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [16, 9],
-      quality: 0.5
+      quality: 0.5,
     });
 
-    if (!image.cancelled) {
-      setPickedImage(image.uri);
-      props.onImageTaken(image.uri); // This ensures that the parent component is notified about the image URI
+    if (!image.canceled) {
+      setPickedImage(image.assets[0].uri);
+      props.onImageTaken(image.assets[0].uri);
+    }
+  };
+
+  const pickImageHandler = async () => {
+    const hasPermission = await verifyGalleryPermissions();
+    if (!hasPermission) {
+      return;
+    }
+
+    const image = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.5,
+    });
+
+    if (!image.canceled) {
+      setPickedImage(image.assets[0].uri);
+      props.onImageTaken(image.assets[0].uri);
     }
   };
 
   return (
-    <View style={styles.imagePicker}>
+    <View>
       <View style={styles.imagePreview}>
         {!pickedImage ? (
           <Text>No image picked yet.</Text>
@@ -44,35 +76,36 @@ export const ImgPicker = (props) => {
           <Image style={styles.image} source={{ uri: pickedImage }} />
         )}
       </View>
-      <Button
-        title="Take Image"
-        color={'#444'}
-        onPress={takeImageHandler}
-      />
+      <View style={styles.buttons}>
+        <Button title="Take Image" color="#444" onPress={takeImageHandler} />
+        <Button
+          title="Choose from Gallery"
+          color="#888"
+          onPress={pickImageHandler}
+        />
+      </View>
     </View>
   );
 };
 
-export default ImgPicker
-
 const styles = StyleSheet.create({
-  imagePicker: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%'
-  },
   imagePreview: {
-    width: '100%',
-    height: 200,
-    marginBottom: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderColor: '#ccc',
-    borderWidth: 1
+    width: "100%",
+    height: 600,
+    justifyContent: "center",
+    alignItems: "center",
+    borderColor: "#ccc",
+    borderWidth: 1,
   },
   image: {
-    width: '100%',
-    height: '100%'
-  }
+    width: "100%",
+    height: "100%",
+  },
+  buttons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 20,
+  },
 });
+
+export default ImgPicker;
